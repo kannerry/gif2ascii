@@ -1,8 +1,9 @@
 import os
-from PIL import Image, ImageSequence
+from PIL import Image, ImageSequence, ImageFont, ImageDraw
+import imageio
 
 # Define the ASCII characters to use for each grayscale value
-ascii_chars = [" ", ".", ",", ":", ";", "+", "*", "?", "S", "W", "A", "G"]
+ascii_chars = [" ", ".", ",", ":", ";", "+", "!", "/", "K", "N", "R", "?"]
 
 scale_temp = input("enter an input scale. e.g: '6'\nyour input determines how many pixels one character should take up.\n")
 
@@ -37,8 +38,37 @@ def gif_to_png(gif_file):
         png_filename = f"{frames_dir}/{i + 1}.png"
         frame.save(png_filename, "PNG")
         ascii = png_to_ascii(png_filename)
-        print(ascii)
 
+def txt_to_gif(gif_dir):
+	gifdir = str(gif_dir.split(".gif")[0]) + "_frames/"
+	tarray = []
+	images = []
+	for file in os.listdir(gifdir):
+		if file.endswith(".txt"):
+			tarray.append(file)
+	tarray.sort(key=lambda f: int(''.join(filter(str.isdigit, f))))
+	for frame in tarray:
+		with open(gifdir + frame, "r") as f:
+			frame_content = f.read()
+			frame_gen = text_to_image(frame_content)
+			frame_gen.save(gifdir + frame.replace("txt", "png"))
+		images.append(imageio.imread(gifdir + frame.replace("txt", "png")))
+	imgname = os.path.splitext(gif_dir)[0].split("\\")[-1] # ?
+	imageio.mimsave(imgname + "_ascii.gif", images, format='GIF', duration=int(fps) / 1000)
+
+def text_to_image(_string):
+	img = Image.new('RGB', (1, 1))
+	_d = ImageDraw.Draw(img)
+	text_width, text_height = _d.textsize(_string)
+	real_img = Image.new('RGB', (text_width, text_height))	
+	d = ImageDraw.Draw(real_img)
+	d.text((0, 0), _string, fill=(0, 255, 0))
+	os.system('cls')
+	print("processing...")
+	return real_img
+	
+fps = input("how fast should each frame go by? (fps of gif)\n")
 gif_real = input("now enter a gif directory! :D\n")
 gif_to_png(gif_real)
+txt_to_gif(gif_real)
 
