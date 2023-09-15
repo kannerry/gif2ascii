@@ -1,5 +1,5 @@
 import os
-from PIL import Image, ImageSequence, ImageFont, ImageDraw
+from PIL import Image, ImageSequence, ImageDraw, ImageOps
 import imageio
 
 # Define the ASCII characters to use for each grayscale value
@@ -13,12 +13,15 @@ def png_to_ascii(png_file):
     img = Image.open(png_file).convert('RGBA')
     width, height = img.size
     # Scale the image down so that each pixel corresponds to an ASCII character
+    if "yes" in invert_input:
+        img = img.convert("RGB")
+        img = ImageOps.invert(img)
     img = img.resize((width // char_width, height // char_height))
     # Convert each pixel to an ASCII character based on its grayscale value
     ascii_str = ""
     for y in range(img.height):
         for x in range(img.width):
-            r, g, b, a = img.getpixel((x, y))
+            r, g, b, *a = img.getpixel((x, y))
             if a == 0:
                 ascii_str += " "
             else:
@@ -67,7 +70,8 @@ def text_to_image(_string):
 	print("processing...")
 	return real_img
 	
-fps = input("how fast should each frame go by? (fps of gif)\n")
+fps = input("how fast should each frame go by? (length of each frame in ms)\n")
+invert_input = input("should we invert the image? (if your gif comes out wrong, try 'yes')\n")
 gif_real = input("now enter a gif directory! :D\n")
 gif_to_png(gif_real)
 txt_to_gif(gif_real)
