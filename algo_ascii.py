@@ -67,7 +67,7 @@ def text_to_image(_string):
     real_img = Image.new('RGB', (text_width, text_height))
     d = ImageDraw.Draw(real_img)
     if "y" in line_height_input:
-        d.text((0, 0), _string, fill=(0, 255, 0), spacing=0.0)
+        d.text((0, 0), _string, fill=(0, 255, 0), spacing=-2.0)
     else:
         d.text((0, 0), _string, fill=(0, 255, 0))
     os.system('cls')
