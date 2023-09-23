@@ -1,20 +1,22 @@
 import os
+import sys
 from PIL import Image, ImageSequence, ImageDraw, ImageOps
 import imageio
+import shutil
 
-# Define the ASCII characters to use for each grayscale value
-ascii_chars = [" ", ".", ",", ":", ";", "+", "!", "/", "K", "N", "R", "?"]
-
+args = sys.argv
+args.pop(0)
+hasDraggedGif = args != []
+ascii_chars = [' ', '.', '^', ',', ':', ';', 'I', 'l', '!', 'i', '>', '<', '~', '+', '_', '-', '?', ']', '[', '}',
+               '{', '1', ')', '(', '|', '/', 't', 'f', 'j', 'r', 'x', 'n', 'u', 'v', 'c', 'z', 'X', 'Y', 'U', 'J', 'C', 'L', 'Q', '0', 'O', 'Z', 'm', 'w', 'q', 'p', 'd', 'b', 'k', 'h', 'a', 'o', '*', '#', 'M', 'W', '&', '8', '%', 'B', '@', '$']
 
 def png_to_ascii(png_file):
     img = Image.open(png_file).convert('RGBA')
     width, height = img.size
-    # Scale the image down so that each pixel corresponds to an ASCII character
     if "y" in invert_input:
         img = img.convert("RGB")
         img = ImageOps.invert(img)
-    img = img.resize((width // char_width, height // char_height))
-    # Convert each pixel to an ASCII character based on its grayscale value
+    img = img.resize((width // int(char_width), height // int(char_height)))
     ascii_str = ""
     for y in range(img.height):
         for x in range(img.width):
@@ -25,7 +27,6 @@ def png_to_ascii(png_file):
                 gray_value = round(0.2989 * r + 0.5870 * g + 0.1140 * b)
                 ascii_str += ascii_chars[gray_value * len(ascii_chars) // 256]
         ascii_str += "\n"
-    # Save the ASCII output to a text file
     with open(f"{png_file.split('.')[0]}.txt", "w") as f:
         f.write(ascii_str)
     return ascii_str
@@ -58,6 +59,7 @@ def txt_to_gif(gif_dir):
         images.append(imageio.imread(gifdir + frame.replace("txt", "png")))
     imageio.mimsave(imgname + "_ascii.gif", images,
                     format='GIF', duration=int(fps) / 1000)
+    shutil.rmtree(gifdir)
 
 
 def text_to_image(_string):
@@ -66,27 +68,33 @@ def text_to_image(_string):
     text_width, text_height = _d.textsize(_string)
     real_img = Image.new('RGB', (text_width, text_height))
     d = ImageDraw.Draw(real_img)
-    if "y" in line_height_input:
-        d.text((0, 0), _string, fill=(0, 255, 0), spacing=-2.0)
-    else:
-        d.text((0, 0), _string, fill=(0, 255, 0))
+    d.text((0, 0), _string, fill=(0, 255, 0), spacing=-2.0)
+    real_img = real_img.crop((0,0,real_img.width,real_img.height * 0.6))
     os.system('cls')
     print("processing...")
     return real_img
 
 
-gif_real = input("enter a gif directory! :D\n")
+def prompt_default():
+    gif_real = input("enter a gif directory! :D\n")
+    gif_to_png(gif_real)
+    txt_to_gif(gif_real)
+
+def process_dragged(array):
+    for gif in array:
+        gif_to_png(gif)
+        txt_to_gif(gif)
+
 fps = input(
     "how fast should each frame go by? (length of each frame in ms)\n") or "60"
 invert_input = input(
-    "should we invert the image? (if your gif comes out wrong, try 'yes')\n") or "no"
-line_height_input = input(
-    "should we lower the line height? (if your gif aspect ratio comes out horribly wrong, try 'yes')\n") or "no"
+    "should we invert the image? (if your gif comes out wrong, try 'yes')\n") or "n"
 scale_temp = input(
     "enter an input scale. e.g: '6'\nyour input determines how many pixels one character should take up.\n") or "2"
+char_width = int(scale_temp) * 2
+char_height = int(scale_temp) * 3
 
-# The width and height of each ASCII character
-char_width, char_height = int(scale_temp) * 2, int(scale_temp) * 3
-
-gif_to_png(gif_real)
-txt_to_gif(gif_real)
+if hasDraggedGif:
+    process_dragged(args)
+else:
+    prompt_default()
