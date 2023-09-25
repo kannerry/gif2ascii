@@ -43,7 +43,8 @@ def gif_to_png(gif_file):
 
 
 def txt_to_gif(gif_dir):
-    gifdir = str(gif_dir.split(".gif")[0]) + "_frames/"
+    gifdir = str(gif_dir.split(".")[0]) + "_frames/"
+    format = str(gif_dir.split(".")[1])
     tarray = []
     images = []
     for file in os.listdir(gifdir):
@@ -57,9 +58,13 @@ def txt_to_gif(gif_dir):
             frame_gen = text_to_image(frame_content)
             frame_gen.save(gifdir + frame.replace("txt", "png"))
         images.append(imageio.imread(gifdir + frame.replace("txt", "png")))
-    imageio.mimsave(imgname + "_ascii.gif", images,
-                    format='GIF', duration=int(fps) / 1000)
-    shutil.rmtree(gifdir)
+    if format == "gif":
+        try:
+            dur = int(fps)
+        except:
+            dur = 60
+        imageio.mimsave(imgname + "_ascii." + str(format), images,
+                        format=format, duration=dur / 1000)
 
 
 def text_to_image(_string):
@@ -76,9 +81,12 @@ def text_to_image(_string):
 
 
 def prompt_default():
-    gif_real = input("enter a gif directory! :D\n")
-    gif_to_png(gif_real)
-    txt_to_gif(gif_real)
+    gif_real = input("enter an image/gif directory\n") or None
+    if gif_real == None:
+        prompt_default()
+    else:
+        gif_to_png(gif_real)
+        txt_to_gif(gif_real)
 
 def process_dragged(array):
     for gif in array:
