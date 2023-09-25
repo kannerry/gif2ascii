@@ -21,7 +21,8 @@ def png_to_ascii(png_file):
     for y in range(img.height):
         for x in range(img.width):
             r, g, b, *a = img.getpixel((x, y))
-            if a == 0:
+            white_pixel = r >= 254 and g >= 254 and b >= 254
+            if a == 0 or white_pixel:
                 ascii_str += " "
             else:
                 gray_value = round(0.2989 * r + 0.5870 * g + 0.1140 * b)
