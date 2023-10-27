@@ -1,8 +1,7 @@
 import os
 import sys
-from PIL import Image, ImageSequence, ImageDraw, ImageOps
-import imageio
-import shutil
+from lib_old.PIL import Image, ImageSequence, ImageDraw, ImageOps
+import imageio.v3 as iio
 
 args = sys.argv
 args.pop(0)
@@ -58,13 +57,13 @@ def txt_to_gif(gif_dir):
             frame_content = f.read()
             frame_gen = text_to_image(frame_content)
             frame_gen.save(gifdir + frame.replace("txt", "png"))
-        images.append(imageio.imread(gifdir + frame.replace("txt", "png")))
+        images.append(iio.imread(gifdir + frame.replace("txt", "png")))
     if format == "gif":
         try:
             dur = int(fps)
         except:
             dur = 60
-        imageio.mimsave(imgname + "_ascii." + str(format), images,
+        iio.imwrite(imgname + "_ascii." + str(format), images,
                         format=format, duration=dur / 1000)
 
 
