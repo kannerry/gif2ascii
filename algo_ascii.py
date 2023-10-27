@@ -64,7 +64,7 @@ def txt_to_gif(gif_dir):
         except:
             dur = 60
         iio.imwrite(imgname + "_ascii." + str(format), images,
-                        format=format, duration=dur / 1000)
+                        format=format, duration=dur / 1000, loop=0)
 
 
 def text_to_image(_string):
